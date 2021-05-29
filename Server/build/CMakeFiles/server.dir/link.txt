@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/server.dir/src/EpollProcess.cpp.o CMakeFiles/server.dir/src/main.cpp.o  -o ../bin/server  -lpthread 

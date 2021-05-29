@@ -1,0 +1,12 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/huangxingli/SocketChat/SocketChat/Server/src/EpollProcess.cpp
+epollprocess.h
+/home/huangxingli/SocketChat/SocketChat/Server/src/epollprocess.h
+
