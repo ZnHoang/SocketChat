@@ -1,3 +1,0 @@
-/home/huangxingli/SocketChat/SocketChat/Server/build/CMakeFiles/rebuild_cache.dir
-/home/huangxingli/SocketChat/SocketChat/Server/build/CMakeFiles/edit_cache.dir
-/home/huangxingli/SocketChat/SocketChat/Server/build/CMakeFiles/server.dir
