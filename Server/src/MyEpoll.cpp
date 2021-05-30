@@ -1,15 +1,5 @@
 #include "MyEpoll.h"
 
-MyEpoll::MyEpoll(const int& sfd)
-    :   sfd(sfd)
-{
-    if(initEpoll(); epfd > 0)
-    {
-        throw errno;
-    }
-
-}
-
 MyEpoll::~MyEpoll()
 {
 
@@ -17,5 +7,8 @@ MyEpoll::~MyEpoll()
 
 void MyEpoll::initEpoll()
 {
-    epfd = epoll_create(100000);
+    if(epfd = epoll_create(100000); epfd == -1)
+    {
+        throw errno;
+    }
 }

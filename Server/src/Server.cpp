@@ -1,19 +1,7 @@
 #include "Server.h"
-
 Server::Server()
 {
     /*
-    struct sockaddr_in sin;
-    int sfd = socket(AF_INET, SOCK_STREAM, 0);
-    int opt = 1;
-    setsockopt(sfd, SOL_SOCKET, SO_REUSEPORT, static_cast<const void *>(&opt), sizeof(opt));
-    fcntl(sfd, F_SETFL, O_NONBLOCK);
-    memset(&sin, 0, sizeof(sin));
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = htonl(INADDR_ANY);
-    sin.sin_port = htons(port);
-    bind(sfd, static_cast<sockaddr*>(static_cast<void*>(&sin)), sizeof(sin));
-    listen(sfd, 10000);
     int epfd = epoll_create(maxConn);
     epoll_event epev;
     epev.events = EPOLLIN | EPOLLET;
@@ -72,14 +60,81 @@ Server::Server()
     }
     */
     try{
-        myEpoll = {123};
-    } catch(int en)
-    {
-        std::cout << strerror(en);
+        initServer();
+        myEpoll.initEpoll();
+    } catch(int en) {
+        throw;
     }
+
+    ThreadPool tp;
+    tp.addTask(Priority::HIGH, Server::task);
 }
 
 Server::~Server()
 {
     
+}
+
+void Server::initServer()
+{
+    try {
+        initSocketFd();
+        setFdNonBl();
+        Bind();
+        Listen();
+    } catch(int en) {
+        throw;
+    }
+}
+
+void Server::initSocketFd()
+{
+    if(sfd = socket(AF_INET, SOCK_STREAM, 0); sfd == -1)
+    {
+        throw errno;
+    }
+    int opt = 1;
+    if(int res = setsockopt(sfd, SOL_SOCKET, SO_REUSEPORT, static_cast<const void *>(&opt), sizeof(opt)); res == -1)
+    {
+        throw errno;
+    }
+}
+
+void Server::setFdNonBl()
+{
+    int oldFl = 0;
+    if(oldFl = fcntl(sfd, F_GETFL); oldFl == -1)
+    {
+        throw errno;
+    }
+    if(int res = fcntl(sfd, F_SETFL, oldFl | O_NONBLOCK); res == -1)
+    {
+        throw errno;
+    }
+}
+
+void Server::Bind()
+{
+    struct sockaddr_in sin;
+    memset(&sin, 0, sizeof(sin));
+    sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = htonl(INADDR_ANY);
+    sin.sin_port = htons(PORT);
+    if(int res = bind(sfd, static_cast<sockaddr*>(static_cast<void*>(&sin)), sizeof(sin)); res == -1)
+    {
+        throw errno;
+    }
+}
+
+void Server::Listen()
+{
+    if(int res = listen(sfd, MAX_CONN); res == -1)
+    {
+        throw errno;
+    }
+}
+
+void Server::task()
+{
+    std::cout << "fuck\n";
 }

@@ -10,11 +10,11 @@ class MyEpoll
 {
 public:
     MyEpoll() = default;
-    MyEpoll(const int& sfd);
+    // MyEpoll(const int& sfd);
     ~MyEpoll();
-
-private:
     void initEpoll();
+    
+private:
 
     int epfd;
     int sfd;

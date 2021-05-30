@@ -2,6 +2,10 @@
 
 int main()
 {
-    Server sev;
+    try {
+        Server server;
+    } catch(int en) {
+        std::cout << strerror(en);
+    }
     return 0;
 }
