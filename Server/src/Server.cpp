@@ -65,12 +65,14 @@ Server::Server()
     } catch(int en) {
         throw;
     }
-
-    ThreadPool tp;
-    tp.addTask(Priority::HIGH, Server::task);
 }
 
 Server::~Server()
+{
+    
+}
+
+void Server::Start()
 {
     
 }
@@ -134,7 +136,8 @@ void Server::Listen()
     }
 }
 
-void Server::task()
+void Server::task(const int& fd)
 {
-    std::cout << "fuck\n";
+    std::cout << std::this_thread::get_id() << std::endl;
+    std::cout << fd << std::endl;
 }

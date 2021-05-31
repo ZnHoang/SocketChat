@@ -14,6 +14,7 @@
 #include <condition_variable>
 
 //优先度枚举类
+//如果为HIGH则不论加入时间
 enum class Priority
 {
     LOW, MIDDLE, HIGH
@@ -36,6 +37,11 @@ public:
     //根据创建时间以及优先度进行优先队列的插入
     friend bool operator< (const stTask& a, const stTask& b)
     {
+        if(a.priority == Priority::HIGH && b.priority != Priority::HIGH
+           || a.priority != Priority::HIGH && b.priority == Priority::HIGH)
+        {
+            return a.priority != Priority::HIGH;
+        }
         auto A = a.diffTime - static_cast<int>(a.priority) * priTime;
         auto B = b.diffTime - static_cast<int>(b.priority) * priTime;
         return A < B;

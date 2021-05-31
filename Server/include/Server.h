@@ -11,24 +11,32 @@
 #include <error.h>
 #include "MyEpoll.h"
 #include "ThreadPool.h"
+#include <unistd.h>
+#include <unordered_map>
+
+const int PORT{8888};
+const int MAX_CONN{10000};
+const uint MAX_THREAD{3};
+
 class Server
 {
 public:
     Server();
     ~Server();
-
+    void Start();
 private:
     void initServer();
     void initSocketFd();
     void setFdNonBl();
     void Bind();
     void Listen();
-    static void task();
+    static void task(const int& fd);
 
-    const int PORT{8888};
-    const int MAX_CONN{10000};
     int sfd;
     MyEpoll myEpoll;
+    ThreadPool tp{MAX_THREAD};
+    using pQueMsg = std::shared_ptr<std::queue<std::string>>;
+    std::unordered_map<int, pQueMsg> fd2Msg;
 };
 
 #endif

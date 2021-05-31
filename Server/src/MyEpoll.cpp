@@ -12,3 +12,9 @@ void MyEpoll::initEpoll()
         throw errno;
     }
 }
+
+void MyEpoll::Round()
+{
+    epoll_event epevs[100000];
+    int res = epoll_wait(epfd, epevs, 100000, 100);
+}

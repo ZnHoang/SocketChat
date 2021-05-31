@@ -57,7 +57,7 @@ const task ThreadPool::popTask()
     {
         cv.wait(lk);
     }
-    if(isStart)
+    if(isStart && countTasks > 0)
     {
         auto t = qTasks.top().get()->t;
         qTasks.pop();

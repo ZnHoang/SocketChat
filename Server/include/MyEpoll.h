@@ -13,7 +13,8 @@ public:
     // MyEpoll(const int& sfd);
     ~MyEpoll();
     void initEpoll();
-    
+    void Round();
+
 private:
 
     int epfd;
