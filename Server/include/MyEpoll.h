@@ -5,17 +5,19 @@
 #include <error.h>
 #include <string.h>
 #include <iostream>
+#include <vector>
 
 class MyEpoll
 {
 public:
     MyEpoll() = default;
-    // MyEpoll(const int& sfd);
     ~MyEpoll();
     void initEpoll();
-    void Round();
+    const std::vector<epoll_event>&& Check();
+    const int&& setEvent(const int& op, const int& listenFd, const int& evs = 0);
 
 private:
+    const epoll_event createEpEv(const int& listenFd, const int& op);
 
     int epfd;
     int sfd;

@@ -13,6 +13,8 @@
 #include "ThreadPool.h"
 #include <unistd.h>
 #include <unordered_map>
+#include <vector>
+#include "ClientStruct.h"
 
 const int PORT{8888};
 const int MAX_CONN{10000};
@@ -30,13 +32,18 @@ private:
     void setFdNonBl();
     void Bind();
     void Listen();
+    void addAcceptEv();
+    void resetVEpEvs();
+    void dealEvent(const epoll_event& epev);
     static void task(const int& fd);
+    const int task2();
 
     int sfd;
     MyEpoll myEpoll;
     ThreadPool tp{MAX_THREAD};
-    using pQueMsg = std::shared_ptr<std::queue<std::string>>;
-    std::unordered_map<int, pQueMsg> fd2Msg;
+    std::mutex mtMapFd2Msg;
+    std::unordered_map<int, std::shared_ptr<ClientStruct>> mapFd2Msg;
+    std::vector<epoll_event> vEpEvs;
 };
 
 #endif

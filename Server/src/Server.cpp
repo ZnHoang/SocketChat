@@ -2,12 +2,6 @@
 Server::Server()
 {
     /*
-    int epfd = epoll_create(maxConn);
-    epoll_event epev;
-    epev.events = EPOLLIN | EPOLLET;
-    epev.data.fd = sfd;
-    epoll_ctl(epfd, EPOLL_CTL_ADD, sfd, &epev);
-    struct epoll_event evListen[maxConn];
     while(1)
     {
         int res = epoll_wait(epfd, evListen, maxConn, 0);
@@ -59,9 +53,10 @@ Server::Server()
         }
     }
     */
-    try{
+    try {
         initServer();
         myEpoll.initEpoll();
+        addAcceptEv();
     } catch(int en) {
         throw;
     }
@@ -74,7 +69,15 @@ Server::~Server()
 
 void Server::Start()
 {
-    
+    while(1)
+    {
+        resetVEpEvs();
+        vEpEvs = myEpoll.Check();
+        for(const auto& v : vEpEvs)
+        {
+            dealEvent(v);
+        }
+    }
 }
 
 void Server::initServer()
@@ -136,8 +139,34 @@ void Server::Listen()
     }
 }
 
+void Server::addAcceptEv()
+{
+    int op = EPOLL_CTL_ADD;
+    int evs = EPOLLIN | EPOLLET;
+    if(int en = myEpoll.setEvent(op, sfd, evs); en != 0)
+    {
+        throw en;
+    }
+}
+
+void Server::resetVEpEvs()
+{
+    vEpEvs.clear();
+}
+
+void Server::dealEvent(const epoll_event& epev)
+{
+
+}
+
 void Server::task(const int& fd)
 {
     std::cout << std::this_thread::get_id() << std::endl;
     std::cout << fd << std::endl;
+}
+
+const int Server::task2()
+{
+    int a = 10;
+    return a;
 }
