@@ -12,6 +12,7 @@
 #include <chrono>
 #include <mutex>
 #include <condition_variable>
+#include <tuple>
 
 //优先度枚举类
 //如果为HIGH则不论加入时间
@@ -83,8 +84,12 @@ template <typename Func, typename... Args>
 void ThreadPool::addTask(Priority prio, Func&& func, Args&&... args)
 {
     std::unique_lock<std::mutex> lk(mt);
-    auto t = std::bind(std::forward<Func>(func), std::forward<Args>(args)...);
-    task tas = [t](){t();};
+    // auto t = std::bind(std::forward<Func>(func), std::forward<Args>(args)...);
+    // task tas = [t](){t();};
+    auto tas = 
+        [func = std::forward<Func>(func), args = std::make_tuple(std::forward<Args>(args)...)]
+        () mutable
+        {std::apply(func, args);};
     stTask st;
     st.priority = prio;
     st.t = tas;

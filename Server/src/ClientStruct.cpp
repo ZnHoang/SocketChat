@@ -2,15 +2,22 @@
 
 ClientStruct::ClientStruct(int clitfd)
     :   clitFd(clitfd),
-        readFlag(false),
-        writeFlag(false)
+        readFlag(ReadFlag::NONE),
+        writeFlag(WriteFlag::NONE)
 {
 
 }
 
-void ClientStruct::setRead(const int& originFlag, const int& targetFlag)
+const ReadFlag ClientStruct::setRead(const std::unordered_map<ReadFlag, ReadFlag>& otFlags)
 {
-    
+    std::unique_lock<std::mutex> lk(mtRead);
+    auto it = otFlags.find(readFlag);
+    auto originFlag = readFlag;
+    if(it != otFlags.end())
+    {
+        readFlag = it->second;
+    }
+    return originFlag;
 }
 
 const int& ClientStruct::getClitFd()

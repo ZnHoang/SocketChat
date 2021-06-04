@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <vector>
 #include "ClientStruct.h"
+#include "TaskFunction.h"
 
 const int PORT{8888};
 const int MAX_CONN{10000};
@@ -34,7 +35,7 @@ private:
     void Listen();
     void addAcceptEv();
     void resetVEpEvs();
-    void dealEvent(const epoll_event& epev);
+    void dealEvent(const epoll_event epev);
     static void task(const int& fd);
     const int task2();
 

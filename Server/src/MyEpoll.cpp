@@ -13,27 +13,27 @@ void MyEpoll::initEpoll()
     }
 }
 
-const std::vector<epoll_event>&& MyEpoll::Check()
+const std::vector<epoll_event> MyEpoll::Check()
 {
     epoll_event epevs[100000];
     int res;
-    if(res = epoll_wait(epfd, epevs, 100000, 1000); res == -1)
+    if(res = epoll_wait(epfd, epevs, 100000, -1); res == -1)
     {
         throw errno;
     }
     return std::vector<epoll_event>(epevs, epevs + res);
 }
 
-const int&& MyEpoll::setEvent(const int& op, const int& listenFd, const int& evs)
+const int MyEpoll::setEvent(const int& op, const int& listenFd, const int& evs)
 {
     epoll_event epev = createEpEv(listenFd, evs);
     return epoll_ctl(epfd, op, listenFd, &epev) == 0 ? 0 : errno;
 }
 
-const epoll_event MyEpoll::createEpEv(const int& listenFd, const int& op)
+const epoll_event MyEpoll::createEpEv(const int& listenFd, const int& evs)
 {
     epoll_event epev;
     epev.data.fd = listenFd;
-    epev.events = op;
+    epev.events = evs;
     return epev;
 }

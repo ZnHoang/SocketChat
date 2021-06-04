@@ -38,9 +38,14 @@ void TaskFunction::acceptClient(const int& sfd, MyEpoll& me)
                 }
                 else
                 {
-                    
+                    std::unordered_map<ReadFlag, ReadFlag> um;
+                    um[ReadFlag::NONE] = ReadFlag::READ;
+                    p.get()->setRead(um);
+                    char dst[16];
+                    printf("NEW CONNECTION:\nIP:%s\nPORT:%d\n\n", inet_ntop(AF_INET, static_cast<void *>(&clitAddr.sin_addr), dst, sizeof(dst)), ntohs(clitAddr.sin_port));
                 }
             }
         }
+        std::cout << "fucl\n";
     }
 }

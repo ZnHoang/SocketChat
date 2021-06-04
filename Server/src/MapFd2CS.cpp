@@ -1,7 +1,7 @@
 #include "MapFd2CS.h"
 
-std::mutex mt;
-std::unordered_map<int, std::shared_ptr<ClientStruct>> mFC;
+std::mutex MapFd2CS::mt;
+std::unordered_map<int, std::shared_ptr<ClientStruct>> MapFd2CS::mFC;
 
 bool MapFd2CS::addStruct(const int& clitFd)
 {
@@ -22,7 +22,8 @@ bool MapFd2CS::getPStruct(const int& clitFd, std::shared_ptr<ClientStruct>& pCS)
     {
         return false;
     }
-    pCS.reset(mFC[clitFd].get());
+    // pCS.reset(mFC[clitFd].get());
+    pCS = mFC[clitFd];
     return true;
 }
 

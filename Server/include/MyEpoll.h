@@ -13,11 +13,11 @@ public:
     MyEpoll() = default;
     ~MyEpoll();
     void initEpoll();
-    const std::vector<epoll_event>&& Check();
-    const int&& setEvent(const int& op, const int& listenFd, const int& evs = 0);
+    const std::vector<epoll_event> Check();
+    const int setEvent(const int& op, const int& listenFd, const int& evs = 0);
 
 private:
-    const epoll_event createEpEv(const int& listenFd, const int& op);
+    const epoll_event createEpEv(const int& listenFd, const int& evs);
 
     int epfd;
     int sfd;

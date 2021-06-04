@@ -25,7 +25,6 @@ Server::Server()
                     int cfd;
                     cfd = accept(sfd, static_cast<sockaddr*>(static_cast<void*>(&clitAddr)), &clitLen);
                     char dst[16];
-                    printf("NEW CONNECTION:\nIP:%s\nPORT:%d\n\n", inet_ntop(AF_INET, static_cast<void *>(&clitAddr.sin_addr), dst, sizeof(dst)), ntohs(clitAddr.sin_port));
                     errno = 0;
                     epoll_event epev2;
                     epev2.events = EPOLLIN | EPOLLET;
@@ -57,6 +56,7 @@ Server::Server()
         initServer();
         myEpoll.initEpoll();
         addAcceptEv();
+        tp.addTask(Priority::MIDDLE, task, sfd);
     } catch(int en) {
         throw;
     }
@@ -73,7 +73,8 @@ void Server::Start()
     {
         resetVEpEvs();
         vEpEvs = myEpoll.Check();
-        for(const auto& v : vEpEvs)
+        std::cout << vEpEvs.size() << std::endl;
+        for(const auto v : vEpEvs)
         {
             dealEvent(v);
         }
@@ -154,9 +155,16 @@ void Server::resetVEpEvs()
     vEpEvs.clear();
 }
 
-void Server::dealEvent(const epoll_event& epev)
+void Server::dealEvent(const epoll_event epev)
 {
+    if(epev.data.fd == sfd)
+    {
+        tp.addTask(Priority::HIGH, TaskFunction::acceptClient, sfd, myEpoll);
+    }
+    else
+    {
 
+    }
 }
 
 void Server::task(const int& fd)
