@@ -14,12 +14,15 @@ enum class ReadFlag{NONE, READ, READING};
 enum class WriteFlag{NONE, WRITE, WRITING};
 
 using pQueMsg = std::shared_ptr<MyMsgQueue>;
+using mRR = std::unordered_map<ReadFlag, ReadFlag>;
+using mWW = std::unordered_map<WriteFlag, WriteFlag>;
 
 class ClientStruct
 {
 public:
     ClientStruct(int clitfd);
-    const ReadFlag setRead(const std::unordered_map<ReadFlag, ReadFlag>& otFlags);
+    const ReadFlag setRead(const mRR& otFlags);
+    const WriteFlag setWrite(const mWW& otFlags);
     const int& getClitFd();
     void Push(const std::string& msg);
     std::string Pop();

@@ -22,6 +22,7 @@ void TaskFunction::acceptClient(const int& sfd, MyEpoll& me)
         }
         else
         {
+            TaskFunction::setFdNonBl(clitFd);
             if(!MapFd2CS::addStruct(clitFd))
             {
                 std::cout << "ERROR CONNECTION\n";
@@ -38,7 +39,7 @@ void TaskFunction::acceptClient(const int& sfd, MyEpoll& me)
                 }
                 else
                 {
-                    std::unordered_map<ReadFlag, ReadFlag> um;
+                    mRR um;
                     um[ReadFlag::NONE] = ReadFlag::READ;
                     p.get()->setRead(um);
                     char dst[16];
@@ -48,4 +49,29 @@ void TaskFunction::acceptClient(const int& sfd, MyEpoll& me)
         }
         std::cout << "fucl\n";
     }
+}
+
+void TaskFunction::readMsg(const int& clitFd, MyEpoll& me)
+{
+    std::shared_ptr<ClientStruct> p;
+    MapFd2CS::getPStruct(clitFd, p);
+    {
+        mRR um;
+        um[ReadFlag::READ] = ReadFlag::READING;
+        p.get()->setRead(um);
+    }
+    {
+        mWW um;
+        if(p.get()->setWrite(um) == WriteFlag::WRITE)
+        {
+            me.setEvent(EPOLL_CTL_ADD, clitFd, EPOLLOUT | EPOLLONESHOT);
+        }
+    }
+    
+}
+
+void TaskFunction::setFdNonBl(const int& clitFd)
+{
+    int oldFl = oldFl = fcntl(clitFd, F_GETFL);
+    fcntl(clitFd, F_SETFL, oldFl | O_NONBLOCK);
 }

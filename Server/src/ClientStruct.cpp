@@ -8,7 +8,7 @@ ClientStruct::ClientStruct(int clitfd)
 
 }
 
-const ReadFlag ClientStruct::setRead(const std::unordered_map<ReadFlag, ReadFlag>& otFlags)
+const ReadFlag ClientStruct::setRead(const mRR& otFlags)
 {
     std::unique_lock<std::mutex> lk(mtRead);
     auto it = otFlags.find(readFlag);
@@ -16,6 +16,18 @@ const ReadFlag ClientStruct::setRead(const std::unordered_map<ReadFlag, ReadFlag
     if(it != otFlags.end())
     {
         readFlag = it->second;
+    }
+    return originFlag;
+}
+
+const WriteFlag ClientStruct::setWrite(const mWW& otFlags)
+{
+    std::unique_lock<std::mutex> lk(mtWrite);
+    auto it = otFlags.find(writeFlag);
+    auto originFlag = writeFlag;
+    if(it != otFlags.end())
+    {
+        writeFlag = it->second;
     }
     return originFlag;
 }
