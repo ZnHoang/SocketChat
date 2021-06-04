@@ -8,6 +8,8 @@
 #include "MapFd2CS.h"
 #include <sys/fcntl.h>
 #include <sys/types.h>
+#include <unistd.h>
+
 class TaskFunction
 {
 public:

@@ -17,7 +17,7 @@ const std::vector<epoll_event> MyEpoll::Check()
 {
     epoll_event epevs[100000];
     int res;
-    if(res = epoll_wait(epfd, epevs, 100000, -1); res == -1)
+    if(res = epoll_wait(epfd, epevs, 100000, 1000); res == -1)
     {
         throw errno;
     }
@@ -26,6 +26,7 @@ const std::vector<epoll_event> MyEpoll::Check()
 
 const int MyEpoll::setEvent(const int& op, const int& listenFd, const int& evs)
 {
+    std::cout << "fuck\n";
     epoll_event epev = createEpEv(listenFd, evs);
     return epoll_ctl(epfd, op, listenFd, &epev) == 0 ? 0 : errno;
 }

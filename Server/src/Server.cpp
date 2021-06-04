@@ -5,7 +5,6 @@ Server::Server()
         initServer();
         myEpoll.initEpoll();
         addAcceptEv();
-        tp.addTask(Priority::MIDDLE, task, sfd);
     } catch(int en) {
         throw;
     }
@@ -22,7 +21,6 @@ void Server::Start()
     {
         resetVEpEvs();
         vEpEvs = myEpoll.Check();
-        std::cout << vEpEvs.size() << std::endl;
         for(const auto v : vEpEvs)
         {
             dealEvent(v);
@@ -109,6 +107,10 @@ void Server::dealEvent(const epoll_event epev)
     if(epev.data.fd == sfd)
     {
         tp.addTask(Priority::HIGH, TaskFunction::acceptClient, sfd, myEpoll);
+    }
+    else if(epev.events & EPOLLIN)
+    {
+        tp.addTask(Priority::LOW, TaskFunction::readMsg, epev.data.fd, myEpoll);
     }
     else
     {
