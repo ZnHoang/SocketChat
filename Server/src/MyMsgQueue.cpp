@@ -1,14 +1,15 @@
 #include "MyMsgQueue.h"
+#include <iostream>
 
 void MyMsgQueue::Push(const std::string& msg)
 {
-    std::unique_lock<std::mutex> lk(mt);
+    ulm lk(mt);
     qMsg.push(msg);
 }
 
 std::string MyMsgQueue::Pop()
 {
-    std::unique_lock<std::mutex> lk(mt);
+    ulm lk(mt);
     if(isEmpty())
     {
         return "";
@@ -16,6 +17,12 @@ std::string MyMsgQueue::Pop()
     std::string msg = qMsg.front();
     qMsg.pop();
     return msg;
+}
+
+bool MyMsgQueue::tryPop()
+{
+    ulm lk(mt);
+    return !qMsg.empty();
 }
 
 bool MyMsgQueue::isEmpty()

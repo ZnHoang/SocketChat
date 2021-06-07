@@ -9,6 +9,7 @@
 #include <vector>
 #include <algorithm>
 #include <unordered_map>
+#include <iostream>
 
 enum class ReadFlag{NONE, READ, READING};
 enum class WriteFlag{NONE, WRITE, WRITING};
@@ -26,6 +27,7 @@ public:
     const int& getClitFd();
     void Push(const std::string& msg);
     std::string Pop();
+    bool tryPop();
 private:
     std::mutex mtRead;
     std::mutex mtWrite;

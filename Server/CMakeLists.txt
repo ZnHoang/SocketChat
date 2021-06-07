@@ -10,6 +10,9 @@ aux_source_directory(src SRC_LIST)
 
 include_directories(include)
 
+set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
+set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+
 add_executable(server ${SRC_LIST})
 
 set(THREADS_PREFER_FLAG ON)

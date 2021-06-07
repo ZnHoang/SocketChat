@@ -15,8 +15,10 @@ class TaskFunction
 public:
     TaskFunction() = delete;
     static void acceptClient(const int& sfd, MyEpoll& me);
-    static void readMsg(const int& clitFd, MyEpoll& me);
-
+    static void recvMsg(const int& clitFd, MyEpoll& me);
+    static void sendMsg(const int& clitFd, MyEpoll& me);
+    static void closeClient(const int& clitFd, MyEpoll& me);
+    static void addSendMsg(std::string& msg, const int& clitFd, MyEpoll& me);
 
 
 

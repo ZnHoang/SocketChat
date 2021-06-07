@@ -50,10 +50,15 @@ void TaskFunction::acceptClient(const int& sfd, MyEpoll& me)
     }
 }
 
-void TaskFunction::readMsg(const int& clitFd, MyEpoll& me)
+void TaskFunction::recvMsg(const int& clitFd, MyEpoll& me)
 {
     std::shared_ptr<ClientStruct> p;
     MapFd2CS::getPStruct(clitFd, p);
+    if(p == nullptr)
+    {
+        TaskFunction::closeClient(clitFd, me);
+        return ;
+    }
     {
         mRR um;
         um[ReadFlag::READ] = ReadFlag::READING;
@@ -70,39 +75,128 @@ void TaskFunction::readMsg(const int& clitFd, MyEpoll& me)
     {
         char buf[1024] = {0};
         int res = recv(clitFd, buf, sizeof(buf), 0);
-        std::cout << res << std::endl;
         if(res > 0)
         {
+            //定义消息结构后再进行解析操作
             std::cout << buf << std::endl;
+            std::string msg = buf;
+            TaskFunction::addSendMsg(msg, clitFd, me);
         }
-        else if(res == 0)
+        else if(res < 0 && errno == EAGAIN)
         {
-            //关闭连接以及相关操作
             break;
         }
         else
         {
-            if(errno == EAGAIN)
-            {
-                break;
-            }
-            break;
+            //关闭连接以及相关操作
+            TaskFunction::closeClient(clitFd, me);
+            return;
         }
     }
-    //断开或异常结束其他操作，否则死循
     mWW mww;
+    int evs = EPOLLIN | EPOLLONESHOT;
     if(p.get()->setWrite(mww) == WriteFlag::WRITE)
     {
-        me.setEvent(EPOLL_CTL_MOD, clitFd, EPOLLOUT | EPOLLIN | EPOLLONESHOT);
-    }
-    else
-    {
-        int res = me.setEvent(EPOLL_CTL_MOD, clitFd, EPOLLIN | EPOLLONESHOT);
-        std::cout << strerror(res) << std::endl;
+        evs |= EPOLLOUT;
     }
     mRR mrr;
     mrr[ReadFlag::READING] = ReadFlag::READ;
     p.get()->setRead(mrr);
+    me.setEvent(EPOLL_CTL_MOD, clitFd, evs);
+}
+
+void TaskFunction::sendMsg(const int& clitFd, MyEpoll& me)
+{
+    std::shared_ptr<ClientStruct> p;
+    MapFd2CS::getPStruct(clitFd, p);
+    if(p == nullptr)
+    {
+        TaskFunction::closeClient(clitFd, me);
+        return ;
+    }
+    {
+        mWW um;
+        um[WriteFlag::WRITE] = WriteFlag::WRITING;
+        p.get()->setWrite(um);
+    }
+    {
+        mRR um;
+        if(p.get()->setRead(um) == ReadFlag::READ)
+        {
+            me.setEvent(EPOLL_CTL_MOD, clitFd, EPOLLIN | EPOLLONESHOT);
+        }
+    }
+    while(1)
+    {
+        std::string msg = p.get()->Pop();
+        if(msg == "")
+        {
+            break;
+        }
+        int res = send(clitFd, msg.c_str(), msg.size(), 0);
+        if(res == -1)
+        {
+            TaskFunction::closeClient(clitFd, me);
+            return ;
+        }
+    }
+    int evs = 0;
+    if(p.get()->tryPop())
+    {
+        evs = EPOLLOUT | EPOLLONESHOT;
+        mWW mww;
+        mww[WriteFlag::WRITING] = WriteFlag::WRITE;
+        p.get()->setWrite(mww);
+    }
+    else
+    {
+        mWW mww;
+        mww[WriteFlag::WRITING] = WriteFlag::NONE;
+        p.get()->setWrite(mww);
+    }
+    mRR mrr;
+    if(p.get()->setRead(mrr) == ReadFlag::READ)
+    {
+        evs |= EPOLLIN;
+    }
+    me.setEvent(EPOLL_CTL_MOD, clitFd, evs);
+}
+
+void TaskFunction::closeClient(const int& clitFd, MyEpoll& me)
+{
+    me.setEvent(EPOLL_CTL_DEL, clitFd);
+    MapFd2CS::delStruct(clitFd);
+    close(clitFd);
+}
+
+void TaskFunction::addSendMsg(std::string& msg, const int& clitFd, MyEpoll& me)
+{
+    std::shared_ptr<ClientStruct> p;
+    MapFd2CS::getPStruct(clitFd, p);
+    if(p == nullptr)
+    {
+        return ;
+    }
+    p.get()->Push(msg);
+    int evs = EPOLLONESHOT;
+    bool isNewEv = false;
+    mWW mww;
+    mww[WriteFlag::NONE] = WriteFlag::WRITE;
+    if(p.get()->setWrite(mww) == WriteFlag::NONE)
+    {
+        evs |= EPOLLOUT;
+        isNewEv = true;
+    }
+    mRR mrr;
+    if(p.get()->setRead(mrr) == ReadFlag::READ)
+    {
+        evs |= EPOLLIN;
+        isNewEv = true;
+    }
+    if(isNewEv)
+    {
+        me.setEvent(EPOLL_CTL_MOD, clitFd, evs);
+    }
 }
 
 void TaskFunction::setFdNonBl(const int& clitFd)

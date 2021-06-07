@@ -110,7 +110,11 @@ void Server::dealEvent(const epoll_event epev)
     }
     else if(epev.events & EPOLLIN)
     {
-        tp.addTask(Priority::LOW, TaskFunction::readMsg, epev.data.fd, myEpoll);
+        tp.addTask(Priority::LOW, TaskFunction::recvMsg, epev.data.fd, myEpoll);
+    }
+    else if(epev.events & EPOLLOUT)
+    {
+        tp.addTask(Priority::MIDDLE, TaskFunction::sendMsg, epev.data.fd, myEpoll);
     }
     else
     {
