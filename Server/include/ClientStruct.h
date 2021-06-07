@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <unordered_map>
 #include <iostream>
+#include <atomic>
+#include <sys/epoll.h>
 
 enum class ReadFlag{NONE, READ, READING};
 enum class WriteFlag{NONE, WRITE, WRITING};
@@ -24,6 +26,9 @@ public:
     ClientStruct(int clitfd);
     const ReadFlag setRead(const mRR& otFlags);
     const WriteFlag setWrite(const mWW& otFlags);
+    const int addEvs(const int evs);
+    const int delEvs(const int evs);
+    const int getEvs();
     const int& getClitFd();
     void Push(const std::string& msg);
     std::string Pop();
@@ -34,6 +39,7 @@ private:
     //0无 1已上 2正做
     ReadFlag readFlag;
     WriteFlag writeFlag;
+    std::atomic<int> evs;
     int clitFd;
     pQueMsg qMsg;
 };

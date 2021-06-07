@@ -32,18 +32,22 @@ void TaskFunction::acceptClient(const int& sfd, MyEpoll& me)
             {
                 std::shared_ptr<ClientStruct> p;
                 MapFd2CS::getPStruct(clitFd, p);
-                if(int res = me.setEvent(EPOLL_CTL_ADD, clitFd, EPOLLIN | EPOLLONESHOT); res != 0)
+                mRR um;
+                um[ReadFlag::NONE] = ReadFlag::READ;
+                p.get()->setRead(um);
+                p.get()->addEvs(EPOLLIN);
+                if(int res = me.setEvent(EPOLL_CTL_ADD, clitFd, p.get()->getEvs()); res != 0)
                 {
+                    TaskFunction::closeClient(clitFd, me);
                     std::cout << strerror(res);
                     return ;
                 }
                 else
                 {
-                    mRR um;
-                    um[ReadFlag::NONE] = ReadFlag::READ;
-                    p.get()->setRead(um);
                     char dst[16];
-                    printf("NEW CONNECTION:\nIP:%s\nPORT:%d\n\n", inet_ntop(AF_INET, static_cast<void *>(&clitAddr.sin_addr), dst, sizeof(dst)), ntohs(clitAddr.sin_port));
+                    printf("NEW CONN:\tIP:%s\tPORT:%d\n\n", 
+                            inet_ntop(AF_INET, static_cast<void *>(&clitAddr.sin_addr), dst, sizeof(dst)), 
+                            ntohs(clitAddr.sin_port));
                 }
             }
         }
@@ -63,14 +67,9 @@ void TaskFunction::recvMsg(const int& clitFd, MyEpoll& me)
         mRR um;
         um[ReadFlag::READ] = ReadFlag::READING;
         p.get()->setRead(um);
+        p.get()->delEvs(EPOLLIN);
     }
-    {
-        mWW um;
-        if(p.get()->setWrite(um) == WriteFlag::WRITE)
-        {
-            me.setEvent(EPOLL_CTL_MOD, clitFd, EPOLLOUT | EPOLLONESHOT);
-        }
-    }
+    me.setEvent(EPOLL_CTL_MOD, clitFd, p.get()->getEvs());
     while(1)
     {
         char buf[1024] = {0};
@@ -93,16 +92,11 @@ void TaskFunction::recvMsg(const int& clitFd, MyEpoll& me)
             return;
         }
     }
-    mWW mww;
-    int evs = EPOLLIN | EPOLLONESHOT;
-    if(p.get()->setWrite(mww) == WriteFlag::WRITE)
-    {
-        evs |= EPOLLOUT;
-    }
+    p.get()->addEvs(EPOLLIN);
     mRR mrr;
     mrr[ReadFlag::READING] = ReadFlag::READ;
     p.get()->setRead(mrr);
-    me.setEvent(EPOLL_CTL_MOD, clitFd, evs);
+    me.setEvent(EPOLL_CTL_MOD, clitFd, p.get()->getEvs());
 }
 
 void TaskFunction::sendMsg(const int& clitFd, MyEpoll& me)
@@ -118,14 +112,9 @@ void TaskFunction::sendMsg(const int& clitFd, MyEpoll& me)
         mWW um;
         um[WriteFlag::WRITE] = WriteFlag::WRITING;
         p.get()->setWrite(um);
+        p.get()->delEvs(EPOLLOUT);
     }
-    {
-        mRR um;
-        if(p.get()->setRead(um) == ReadFlag::READ)
-        {
-            me.setEvent(EPOLL_CTL_MOD, clitFd, EPOLLIN | EPOLLONESHOT);
-        }
-    }
+    me.setEvent(EPOLL_CTL_MOD, clitFd, p.get()->getEvs());
     while(1)
     {
         std::string msg = p.get()->Pop();
@@ -140,26 +129,17 @@ void TaskFunction::sendMsg(const int& clitFd, MyEpoll& me)
             return ;
         }
     }
-    int evs = 0;
+    mWW mww;
+    mww[WriteFlag::WRITING] = WriteFlag::NONE;
+    p.get()->setWrite(mww);
     if(p.get()->tryPop())
     {
-        evs = EPOLLOUT | EPOLLONESHOT;
+        p.get()->addEvs(EPOLLOUT);
         mWW mww;
-        mww[WriteFlag::WRITING] = WriteFlag::WRITE;
+        mww[WriteFlag::NONE] = WriteFlag::WRITE;
         p.get()->setWrite(mww);
     }
-    else
-    {
-        mWW mww;
-        mww[WriteFlag::WRITING] = WriteFlag::NONE;
-        p.get()->setWrite(mww);
-    }
-    mRR mrr;
-    if(p.get()->setRead(mrr) == ReadFlag::READ)
-    {
-        evs |= EPOLLIN;
-    }
-    me.setEvent(EPOLL_CTL_MOD, clitFd, evs);
+    me.setEvent(EPOLL_CTL_MOD, clitFd, p.get()->getEvs());
 }
 
 void TaskFunction::closeClient(const int& clitFd, MyEpoll& me)
@@ -178,25 +158,13 @@ void TaskFunction::addSendMsg(std::string& msg, const int& clitFd, MyEpoll& me)
         return ;
     }
     p.get()->Push(msg);
-    int evs = EPOLLONESHOT;
-    bool isNewEv = false;
     mWW mww;
     mww[WriteFlag::NONE] = WriteFlag::WRITE;
     if(p.get()->setWrite(mww) == WriteFlag::NONE)
     {
-        evs |= EPOLLOUT;
-        isNewEv = true;
+        p.get()->addEvs(EPOLLOUT);
     }
-    mRR mrr;
-    if(p.get()->setRead(mrr) == ReadFlag::READ)
-    {
-        evs |= EPOLLIN;
-        isNewEv = true;
-    }
-    if(isNewEv)
-    {
-        me.setEvent(EPOLL_CTL_MOD, clitFd, evs);
-    }
+    me.setEvent(EPOLL_CTL_MOD, clitFd, p.get()->getEvs());
 }
 
 void TaskFunction::setFdNonBl(const int& clitFd)

@@ -3,7 +3,8 @@
 ClientStruct::ClientStruct(int clitfd)
     :   clitFd(clitfd),
         readFlag(ReadFlag::NONE),
-        writeFlag(WriteFlag::NONE)
+        writeFlag(WriteFlag::NONE),
+        evs(EPOLLONESHOT)
 {
     qMsg = std::make_shared<MyMsgQueue>();
 }
@@ -30,6 +31,23 @@ const WriteFlag ClientStruct::setWrite(const mWW& otFlags)
         writeFlag = it->second;
     }
     return originFlag;
+}
+
+const int ClientStruct::addEvs(const int evs)
+{
+    this->evs |= evs;
+    return this->evs;
+}
+
+const int ClientStruct::delEvs(const int evs)
+{
+    this->evs &= ~evs;
+    return this->evs;
+}
+
+const int ClientStruct::getEvs()
+{
+    return evs;
 }
 
 const int& ClientStruct::getClitFd()
