@@ -16,6 +16,7 @@
 #include <vector>
 #include "ClientStruct.h"
 #include "TaskFunction.h"
+#include "MySqlOp.h"
 
 const int PORT{8888};
 const int MAX_CONN{10000};
@@ -33,10 +34,11 @@ private:
     void setFdNonBl();
     void Bind();
     void Listen();
+    void connMySql();
     void addAcceptEv();
     void resetVEpEvs();
     void dealEvent(const epoll_event epev);
-    static void task(const int& fd);
+    void task(const int& fd);
     const int task2();
 
     int sfd;

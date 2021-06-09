@@ -4,6 +4,8 @@ project(server)
 
 add_compile_options(-std=c++2a)
 
+set(lib_name mysqlclient)
+
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 aux_source_directory(src SRC_LIST)
@@ -21,4 +23,5 @@ find_package(Threads REQUIRED)
 
 target_link_libraries(
     server PUBLIC Threads::Threads 
+    ${lib_name}
 )

@@ -1,5 +1,5 @@
-#ifndef MY_QUEUE_H
-#define MY_QUEUE_H
+#ifndef MY_MSG_QUEUE_H
+#define MY_MSG_QUEUE_H
 
 #include <queue>
 #include <string>

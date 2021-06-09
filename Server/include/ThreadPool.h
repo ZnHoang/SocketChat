@@ -84,8 +84,6 @@ template <typename Func, typename... Args>
 void ThreadPool::addTask(Priority prio, Func&& func, Args&&... args)
 {
     std::unique_lock<std::mutex> lk(mt);
-    // auto t = std::bind(std::forward<Func>(func), std::forward<Args>(args)...);
-    // task tas = [t](){t();};
     auto tas = 
         [func = std::forward<Func>(func), args = std::make_tuple(std::forward<Args>(args)...)]
         () mutable

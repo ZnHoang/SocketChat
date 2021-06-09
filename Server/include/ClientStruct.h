@@ -12,6 +12,7 @@
 #include <iostream>
 #include <atomic>
 #include <sys/epoll.h>
+#include "MySqlOp.h"
 
 enum class ReadFlag{NONE, READ, READING};
 enum class WriteFlag{NONE, WRITE, WRITING};

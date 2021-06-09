@@ -3,9 +3,10 @@ Server::Server()
 {
     try {
         initServer();
+        connMySql();
         myEpoll.initEpoll();
         addAcceptEv();
-    } catch(int en) {
+    } catch(...) {
         throw;
     }
 }
@@ -87,6 +88,18 @@ void Server::Listen()
     }
 }
 
+void Server::connMySql()
+{
+    DbInfo di;
+    di.db = "socket_chat";
+    di.passwd = "Hxl461453964";
+    try {
+        MySqlOp::Connect(di);
+    } catch(std::string se) {
+        throw;
+    }
+}
+
 void Server::addAcceptEv()
 {
     int op = EPOLL_CTL_ADD;
@@ -124,7 +137,6 @@ void Server::dealEvent(const epoll_event epev)
 
 void Server::task(const int& fd)
 {
-    std::cout << std::this_thread::get_id() << std::endl;
     std::cout << fd << std::endl;
 }
 
