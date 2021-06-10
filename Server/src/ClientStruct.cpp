@@ -6,7 +6,7 @@ ClientStruct::ClientStruct(int clitfd)
         writeFlag(WriteFlag::NONE),
         evs(EPOLLONESHOT)
 {
-    qMsg = std::make_shared<MyMsgQueue>();
+    qMsg = std::make_shared<MyQueue<std::string>>();
 }
 
 const ReadFlag ClientStruct::setRead(const mRR& otFlags)
@@ -55,9 +55,9 @@ const int& ClientStruct::getClitFd()
     return clitFd;
 }
 
-void ClientStruct::Push(const std::string& msg)
+void ClientStruct::Push(const std::string&& msg)
 {
-    qMsg.get()->Push(msg);
+    qMsg.get()->Push(std::move(msg));
 }
 
 std::string ClientStruct::Pop()

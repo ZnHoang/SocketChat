@@ -21,5 +21,14 @@ void MySqlOp::Connect(const DbInfo dbInfo)
     {
         throw "MySql connect failed\n";
     }
+    if(auto res = mysql_autocommit(ms, false); res != 0)
+    {
+        throw "MySql set not auto commit failed\n";
+    }
     isConnecting = true;
+}
+
+bool MySqlOp::checkUser(const std::string& nickname, const std::string& password)
+{
+
 }

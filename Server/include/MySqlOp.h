@@ -22,7 +22,7 @@ public:
     MySqlOp() = delete;
     ~MySqlOp();
     static void Connect(const DbInfo dbInfo);
-    static void 
+    static bool checkUser(const std::string& nickname, const std::string& password);
 
 private:
     static MYSQL* ms;

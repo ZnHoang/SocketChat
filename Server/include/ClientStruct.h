@@ -1,7 +1,7 @@
 #ifndef CLIENT_STRUCT_H
 #define CLIENT_STRUCT_H
 
-#include "MyMsgQueue.h"
+#include "MyQueue.hpp"
 #include <memory>
 #include <mutex>
 #include <queue>
@@ -17,7 +17,8 @@
 enum class ReadFlag{NONE, READ, READING};
 enum class WriteFlag{NONE, WRITE, WRITING};
 
-using pQueMsg = std::shared_ptr<MyMsgQueue>;
+// using pQueMsg = std::shared_ptr<MyMsgQueue>;
+using pQueMsg = std::shared_ptr<MyQueue<std::string>>;
 using mRR = std::unordered_map<ReadFlag, ReadFlag>;
 using mWW = std::unordered_map<WriteFlag, WriteFlag>;
 
@@ -31,7 +32,7 @@ public:
     const int delEvs(const int evs);
     const int getEvs();
     const int& getClitFd();
-    void Push(const std::string& msg);
+    void Push(const std::string&& msg);
     std::string Pop();
     bool tryPop();
 private:

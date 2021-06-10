@@ -157,7 +157,7 @@ void TaskFunction::addSendMsg(std::string& msg, const int& clitFd, MyEpoll& me)
     {
         return ;
     }
-    p.get()->Push(msg);
+    p.get()->Push(std::move(msg));
     mWW mww;
     mww[WriteFlag::NONE] = WriteFlag::WRITE;
     if(p.get()->setWrite(mww) == WriteFlag::NONE)
