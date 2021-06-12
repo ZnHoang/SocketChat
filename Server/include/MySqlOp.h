@@ -4,6 +4,8 @@
 #include <iostream>
 #include <mysql/mysql.h>
 #include <string>
+#include <mutex>
+#include <shared_mutex>
 
 using DbInfo = struct DbInfo
 {
@@ -27,7 +29,7 @@ public:
 private:
     static MYSQL* ms;
     static bool isConnecting;
-
+    static std::shared_mutex mt;
 };
 
 #endif

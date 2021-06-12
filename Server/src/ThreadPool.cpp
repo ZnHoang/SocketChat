@@ -53,10 +53,11 @@ void ThreadPool::run()
 const task ThreadPool::popTask()
 {
     std::unique_lock<std::mutex> lk(mt);
-    if(isStart && countTasks == 0)
-    {
-        cv.wait(lk);
-    }
+    cv.wait(lk, [this](){return !this->isStart || this->countTasks > 0;});
+    // if(isStart && countTasks == 0)
+    // {
+    //     cv.wait(lk);
+    // }
     if(isStart && countTasks > 0)
     {
         auto t = qTasks.top().get()->t;

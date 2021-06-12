@@ -2,6 +2,7 @@
 
 MYSQL* MySqlOp::ms = nullptr;
 bool MySqlOp::isConnecting = false;
+std::shared_mutex MySqlOp::mt;
 
 MySqlOp::~MySqlOp()
 {
@@ -30,5 +31,5 @@ void MySqlOp::Connect(const DbInfo dbInfo)
 
 bool MySqlOp::checkUser(const std::string& nickname, const std::string& password)
 {
-
+    return false;
 }
